@@ -1,10 +1,10 @@
 # Design-to-Code Specification: Component Analysis & Pipeline Guide
 
 ## 1. 피그마 메타데이터
-- Library Name: Financial UI Design System Core
-- Page: Components / Date Picker
-- Component Name: DateRangePicker
-- Figma Link: https://www.figma.com/design/... (Placeholder for future code injection)
+- Library Name: 
+- Page: 
+- Component Name: 
+- Figma Link: https
 
 ## 2. 컴포넌트 구조 (Hierarchy)
 - DateRangePicker (Root Container)
