@@ -1,0 +1,164 @@
+# Calendar Date Picker Bottom Sheet (캘린더 데이트 피커 바텀시트)
+
+모바일 화면 하단에서 슬라이드 업되어 월간 달력 그리드(Grid)를 통해 단일 일자 또는 기간(Range)을 직관적으로 선택할 수 있도록 제공하는 캘린더형 날짜 선택 컴포넌트입니다.  
+배경 딤 오버레이와 iOS 시스템 바(상태바 및 홈 인디케이터) 레이아웃 위에서 동작하며, 바텀시트 헤더, 연/월 네비게이션 컨트롤, 요일 헤더, 일자 그리드(오늘, 단일 선택, 기간 선택 상태), 하단 고정 CTA 버튼으로 구성됩니다.
+
+---
+
+## 1. Structure & Layout
+
+* **Canvas Spec:** Width `390px`, Height `844px` (iOS iPhone 기준)
+* **Overlay Layer:** Width `390px`, Height `844px`, Background `var(--background-overlay-dimmed, rgba(0, 0, 0, 0.20))`
+* **Bottom Sheet Container:**
+  * Width: `390px` (Fluid `100%`)
+  * Placement: Absolute Bottom (`top: 303px`)
+  * Radius: Top-Left/Top-Right `24px`
+  * Background: `var(--background-neutral-elevated, #FFFFFF)`
+  * Overflow: `hidden`
+  * Layout: `flex-direction: column`, `align-items: flex-start`
+
+---
+
+## 2. Component Properties
+
+### 2.1 Bottom Sheet Level
+
+| Property | Type | Options | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `title` | Text | String | `"날짜 선택"` | 바텀시트 상단 타이틀 문구 |
+| `hasCloseButton` | Boolean | `true`, `false` | `true` | 우측 상단 닫기(X) 버튼 노출 여부 |
+| `hasHandle` | Boolean | `true`, `false` | `false` | 상단 드래그 핸들 바 노출 여부 |
+| `expanded` | Boolean | `true`, `false` | `false` | 시트 확장 여부 |
+
+### 2.2 Calendar Control & Grid Level
+
+| Property | Type | Options | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `currentYearMonth` | String | String | `"2026.07"` | 현재 탐색 중인 연월 |
+| `hasTodayButton` | Boolean | `true`, `false` | `true` | 오늘 날짜로 즉시 이동하는 버튼 노출 여부 |
+| `selectionMode` | Variant | `single`, `range` | `range` | 단일 날짜 선택 vs 기간(시작-종료) 범위 선택 |
+| `selectedDate` | String / Number | String | `"10"` | 단일 선택 날짜 (`selectionMode="single"`) |
+| `startDate` | String / Number | String | `"21"` | 기간 선택 시작 날짜 (`selectionMode="range"`) |
+| `endDate` | String / Number | String | `"24"` | 기간 선택 종료 날짜 (`selectionMode="range"`) |
+
+### 2.3 Bottom CTA Level
+
+| Property | Type | Options | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `ctaLabel` | Text | String | `"확인"` | 하단 액션 버튼 레이블 |
+| `disabled` | Boolean | `true`, `false` | `false` | 버튼 비활성화 상태 여부 |
+
+---
+
+## 3. Sub-Component Specifications
+
+### 3.1 Sheet Header Area (상단 헤더)
+
+* **Container:**
+  * Padding: Left/Right `20px`, Bottom `20px` (상단 여백: Padding Top `6px`, Bottom `8px`)
+  * Layout: `align-self: stretch`, `flex-direction: column`
+* **Title & Action Row:**
+  * Layout: `justify-content: flex-start`, `align-items: flex-start`, `gap: 20px`
+  * **Title:** 
+    * Typography: `KBFG Text`, Bold (`700`), `18px` / `25px`
+    * Color: `var(--text-neutral-primary, #111827)`
+    * Padding Right: `32px`
+  * **Close Button:**
+    * Size: `24x24px`, Radius `4px`
+    * Icon Spec: Bounding `14.61 x 14.61px`, Color `var(--icon-neutral-primary, #111827)`
+
+---
+
+### 3.2 Calendar Navigation Bar (연월 제어 및 오늘 버튼)
+
+* **Container:** Padding: Top/Bottom `8px`, `justify-content: space-between`, `align-items: center`
+* **Left Controls (이전 이동):**
+  * Gap: `8px`
+  * Prev Year Button (더블 꺾쇠): Container `24x24px`, Icon `13.39 x 13.60px`, Color `var(--icon-neutral-primary, #111827)`
+  * Prev Month Button (싱글 꺾쇠): Container `24x24px`, Icon `7.29 x 13.50px`, Color `var(--icon-neutral-primary, #111827)`
+* **Center Display & Action:**
+  * Gap: `12px`
+  * **Year/Month Title:** 
+    * Typography: `KBFG Text`, Bold (`700`), `18px` / `25px`, Color `var(--text-neutral-primary, #111827)`
+    * Underline: Width `71px`, Outline `1.60px solid var(--border-neutral-quaternary, #9CA3AF)` (Offset `-0.80px`)
+  * **Today Button ("오늘"):**
+    * Min Height: `24px`, Padding: Top/Bottom `2px`, Left/Right `8px`, Radius `6px`
+    * Outline: `1px solid var(--border-neutral-primary-muted, #D1D5DB)` (Offset `-1px`)
+    * Typography: `KBFG Text`, Bold (`700`), `12px` / `17px`, Color `var(--text-neutral-primary, #111827)`
+* **Right Controls (다음 이동):**
+  * Gap: `8px`
+  * Next Month Button (싱글 꺾쇠): Container `24x24px`, Icon `7.29 x 13.50px` (180도 회전), Color `var(--icon-neutral-primary, #111827)`
+  * Next Year Button (더블 꺾쇠 - Disabled 예시): Container `24x24px`, Icon `13.39 x 13.60px`, Color `var(--icon-neutral-disabled, #D1D5DB)`
+
+---
+
+### 3.3 Weekday Header (요일 헤더)
+
+* **Container:** Padding: Top `24px`, Bottom `16px`, Layout `7열 균등 분할 (flex: 1 1 0)`
+* **Labels:** 일, 월, 화, 수, 목, 금, 토
+* **Typography:** `KBFG Text`, Medium (`500`), `12px` / `17px`, Color `var(--text-neutral-placeholder, #9CA3AF)`
+
+---
+
+### 3.4 Date Grid Cell Specifications (일자 셀 스펙)
+
+* **Grid Cell Size:** Cell Height `40px`, Inner Symbol `32x32px`
+
+#### Cell State Matrix
+
+| State | Props | Background / Highlight Shape | Typography / Text Color |
+| :--- | :--- | :--- | :--- |
+| **Default (일반 일자)** | `data-variant="default"` | Transparent | `14px` / `20px` Medium (`500`)<br>`var(--text-neutral-primary, #111827)` |
+| **Today (오늘)** | `data-variant="today"` | Inner Circle `32x32px` Fill<br>`var(--surface-neutral-primary-muted, #ECEEF2)` | `14px` / `20px` Bold (`700`)<br>`var(--text-accent-brand-alt, #111827)` |
+| **Single Selected (단일 선택)** | `data-variant="selected"` | Inner Circle `32x32px` Fill<br>`var(--surface-accent-brand-alt, #111827)` | `14px` / `20px` Medium (`500`)<br>`var(--text-neutral-primary-on, white)` |
+| **Range Start (기간 시작일)** | `data-variant="start"` | Right Half Bar `25x32px` (`#EBF6FF`) +<br>Circle `32x32px` (`var(--surface-accent-blue, #2974FF)`) | `14px` / `20px` Medium (`500`)<br>`var(--text-neutral-primary-on-fixed, white)` |
+| **Range Middle (기간 중간일)** | `data-variant="middle"` | Full Bar `32px` Height Fill<br>`var(--surface-accent-blue-muted, #EBF6FF)` | `14px` / `20px` Medium (`500`)<br>`var(--text-neutral-primary, #111827)` |
+| **Range End (기간 종료일)** | `data-variant="end"` | Left Half Bar `25x32px` (`#EBF6FF`) +<br>Circle `32x32px` (`var(--surface-accent-blue, #2974FF)`) | `14px` / `20px` Medium (`500`)<br>`var(--text-neutral-primary-on-fixed, white)` |
+
+---
+
+### 3.5 Bottom CTA Area (하단 고정 버튼)
+
+* **Container:** Padding: Left/Right `20px`, Bottom `8px`, Background `var(--background-neutral-elevated, white)`
+* **Confirm Button (확인):**
+  * Min Height: `56px`, Border Radius: `16px`
+  * Padding: Left/Right `12px`, Top/Bottom `2px` (내부 텍스트 좌우 패딩 `4px`)
+  * Background: `var(--surface-accent-brand-alt, #111827)`
+  * Typography: `KBFG Text`, Bold (`700`), `18px` / `25px`, Color `var(--text-neutral-primary-on, white)`
+  * Props: `data-size="large"`, `data-variant="primary"`
+
+---
+
+## 4. Design Tokens Mapping
+
+| Token Name | Fallback | Property | Component Usage |
+| :--- | :--- | :--- | :--- |
+| `--background-overlay-dimmed` | `rgba(0, 0, 0, 0.20)` | `background` | 배경 딤 오버레이 채움 |
+| `--background-neutral-elevated` | `#FFFFFF` | `background` | 바텀시트 컨테이너 및 하단 CTA 영역 배경 |
+| `--surface-accent-brand-alt` | `#111827` | `background` | 단일 선택 일자 원형 채움, 하단 확인 버튼 배경 |
+| `--surface-neutral-primary-muted` | `#ECEEF2` | `background` | 오늘(Today) 일자 원형 배경 |
+| `--surface-accent-blue` | `#2974FF` | `background` | 기간 선택 시작일/종료일 원형 채움 |
+| `--surface-accent-blue-muted` | `#EBF6FF` | `background` | 기간 선택 연결 트랙 배경 (Range Bar) |
+| `--border-neutral-quaternary` | `#9CA3AF` | `outline-color` | 연월 텍스트 하단 언더라인 |
+| `--border-neutral-primary-muted` | `#D1D5DB` | `outline-color` | 오늘 버튼 외곽 테두리 |
+| `--text-neutral-primary` | `#111827` | `color` | 시트 타이틀, 연월 텍스트, 일반 일자 및 기간 중간 일자 |
+| `--text-accent-brand-alt` | `#111827` | `color` | 오늘 일자 숫자 강조 |
+| `--text-neutral-placeholder` | `#9CA3AF` | `color` | 요일 헤더 텍스트 |
+| `--text-neutral-primary-on` | `#FFFFFF` | `color` | 단일 선택 일자 숫자, 확인 버튼 텍스트 |
+| `--text-neutral-primary-on-fixed` | `#FFFFFF` | `color` | 기간 시작/종료 일자 숫자 |
+| `--icon-neutral-primary` | `#111827` | `background` / `fill` | 닫기(X), 네비게이션 활성 화살표 아이콘 |
+| `--icon-neutral-disabled` | `#D1D5DB` | `background` / `fill` | 네비게이션 비활성 화살표 아이콘 |
+
+---
+
+## 5. Interaction & Implementation Notes
+
+* **기간 선택 인터랙션 (Range Selection Flow):**
+  1. 첫 번째 일자 탭 시: `start` 상태 지정
+  2. 두 번째 일자 탭 시:
+     * 첫 번째 일자보다 미래 일자일 경우 `end` 상태로 지정되며 사이 구간은 `middle` 트랙으로 자동 연결
+     * 첫 번째 일자보다 과거 일자일 경우 선택 기준일을 새로 탭한 일자로 초기화
+* **상태별 연결 바 구현 (CSS Half-fill):** `start` 및 `end` 셀은 각각 원형 심볼 뒤편에 `width: 50%` 너비의 배경 바를 좌/우로 배치하여 `middle` 트랙과 끊김 없이 매끄럽게 연결되도록 구현합니다.
+* **접근성 (A11y):** 
+  * 캘린더 그리드에 `role="grid"`, 각 셀에 `role="gridcell"`, 선택된 셀에 `aria-selected="true"`를 부여합니다.
+  * 일자 셀마다 스크린 리더용 전체 날짜 정보(예: `aria-label="2026년 7월 21일 화요일 시작일"`)를 제공합니다.
