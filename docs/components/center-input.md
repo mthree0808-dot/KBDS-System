@@ -1,153 +1,107 @@
-# Center Input (센터 인풋)
+# Component: Form / CenterInput
 
-화면 중앙에 배치되어 사용자의 핵심 인터랙션을 유도하는 대형 입력 컴포넌트입니다.  
-금액을 입력하고 실시간 한글 단위를 안내하는 **Amount(금액)** 타입과, 계좌 비밀번호/간편 비밀번호/주민번호 뒷자리 등을 마스킹 및 박스 형태로 입력하는 **Password(비밀번호/PIN)** 타입으로 구성됩니다.
-
----
-
-## 1. Component Overview & Types
-
-* **Amount Type (금액형):**
-  * 송금, 이체, 결제 시 대형 수치 타이핑 및 포맷팅 금액 안내
-  * Placeholder, Typing(커서), Filled(한글 환산 금액), Error(경고) 상태 지원
-* **Password Type (비밀번호/PIN형):**
-  * 4자리/6자리/7자리 등 보안 키패드 연동 입력창
-  * **전체 도트형 (Full Dot):** 기본 7자리 마스킹 인디케이터
-  * **복합/박스형 (Box & Dot):** 고정 마스킹 도트와 입력용 사각 박스 조합 (예: 앞 2자리 박스 + 뒤 도트)
-  * **전체 박스형 (Full Box):** 4자리 전체 사각 PIN 박스 입력 형태
+본 문서는 금액 송금 및 보안 PIN/인증번호 입력 화면에서 중앙 집중형으로 사용되는 `CenterInput` 명세입니다.
+대형 수치 중심의 `amount` 타입과 도트/박스 PIN 형태의 `password` 타입을 단일 명세로 통합 지원하며, 상태별 토큰 바인딩 매트릭스를 정의합니다.
 
 ---
 
-## 2. Component Properties
+## 1. 컴포넌트 구조 (Hierarchy)
 
-### 2.1 General Properties
+CenterInput은 수직 방향(Auto Layout Vertical)의 중앙 집중형 2단 레이아웃 구조를 갖습니다.
 
-| Property | Type | Options | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `type` | Variant | `amount`, `password` | `amount` | 인풋 폼 성격 및 레이아웃 유형 |
-| `status` | Variant | `placeholder`, `typing`, `entered` (또는 `filled`), `error` | `placeholder` | 현재 입력 및 유효성 검증 상태 |
-| `helperText` | Text | String | `""` | 하단 보조 안내 문구 또는 에러 메시지 |
-
-### 2.2 Amount Type Properties
-
-| Property | Type | Options | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `value` | String / Number | String | `""` | 현재 입력된 금액 수치 |
-| `placeholder` | Text | String | `"얼마를 보낼까요?"` | 미입력 상태 플레이스홀더 문구 |
-| `hasBadge` | Boolean | `true`, `false` | `false` | 보조 영역 내 상태 뱃지 노출 여부 |
-| `badgeText` | Text | String | `"한도제한"` | 상태 뱃지 레이블 |
-
-### 2.3 Password Type Properties
-
-| Property | Type | Options | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `layoutStyle` | Variant | `dotOnly`, `boxAndDot`, `boxOnly` | `dotOnly` | 비밀번호 슬롯 레이아웃 구성 방식 |
-| `length` | Number | `4`, `6`, `7` 등 | `7` | 전체 입력/마스킹 자릿수 |
-| `enteredCount` | Number | Integer | `0` | 현재 입력 완료된 자릿수 |
+```text
+[CenterInput Container] (Width: 390px / Fill container)
+  ├── 1. Primary Display Area (수치 타이포그래피 또는 PIN 도트/박스 인디케이터)
+  └── 2. Helper & Feedback Area (출금가능금액/한도제한 뱃지, 한글 환산 표기, 에러/안내 메시지)
+```
 
 ---
 
-## 3. Sub-Component Specifications
+## 2. 속성 (Properties & Variants)
 
-### 3.1 Type: `amount` (금액 입력)
-
-* **Container:** Width `390px`, Padding Top/Bottom `16px`, Left/Right `20px`, Gap `12px`
-* **Main Value Display:**
-  * Layout: `justify-content: center`, `align-items: center`, `gap: 2px`
-  * **Placeholder:** `KBFG Text`, Bold (`700`), `32px` / `45px`, Color `var(--text-neutral-secondary-on, #D1D5DB)`
-  * **Typing:** 
-    * 수치: `Pretendard`, SemiBold (`600`), `38px` / `53px`, Color `var(--text-neutral-primary, #111827)`
-    * Caret (커서): Width `1.60px`, Height `45px`, Color `var(--icon-accent-brand-alt, #111827)`
-  * **Filled:**
-    * 수치: `Pretendard`, SemiBold (`600`), `38px` / `53px`, Color `var(--text-neutral-primary, #111827)`
-    * 단위("원"): `KBFG Text`, Medium (`500`), `26px` / `36px`, Color `var(--text-neutral-primary, #111827)`
-  * **Error:** 
-    * 수치: `Pretendard`, SemiBold (`600`), `38px` / `53px`, Color `var(--text-status-negative, #E53838)`
-    * 단위("원"): `KBFG Text`, Medium (`500`), `26px` / `36px`, Color `var(--text-status-negative, #E53838)`
-* **Sub Information Area:**
-  * **출금가능금액 + 뱃지 (Placeholder):**
-    * 타이틀/금액: `KBFG Text`, `13px` / `18px`, Color `var(--text-neutral-quaternary, #6B7280)`
-    * 뱃지: Height `20px`, Padding `0 6px`, Radius `4px`, Background `var(--surface-accent-red-muted, #FFF6F5)`, Text `var(--text-accent-red, #E53838)`, `11px` / `15px` Bold
-  * **실시간 한글 환산 표기 (Typing / Filled):**
-    * 텍스트: `KBFG Text`, Medium (`500`), `13px` / `18px`, Color `var(--text-neutral-quaternary, #6B7280)`
-  * **에러 메시지 (Error):**
-    * 아이콘: `12x12px` (Bounding `9x9px`), Color `var(--icon-status-negative, #E53838)`
-    * 텍스트: `KBFG Text`, Medium (`500`), `13px` / `18px`, Color `var(--text-status-negative, #E53838)`
+| Property | Type | Options | Default | 설명 |
+|---|---|---|---|---|
+| `type` | String | `amount`, `password` | `amount` | 금액 입력형 vs 패스워드/PIN 입력형 |
+| `state` | String | `placeholder`, `focused`, `entered`, `error` | `placeholder` | 인터랙션 상태 |
+| `pinLength` | Number | `4`, `6`, `7` | `6` | password 타입의 입력 자릿수 |
+| `pinStyle` | String | `dot`, `box`, `mixed` | `dot` | password 인디케이터 스타일 (원형 도트 / 사각 박스 / 혼합형) |
+| `hasBadge` | Boolean | `true`, `false` | `false` | 피드백 영역 내 뱃지 노출 여부 (한도제한 등) |
 
 ---
 
-### 3.2 Type: `password` (비밀번호 / PIN 입력)
+## 3. 상세 레이아웃 스펙
 
-* **Container:** Width `390px`, Padding Top/Bottom `28px`, Left/Right `20px`, Gap `20px`
-* **Slots Area:** `align-self: stretch`, `justify-content: center`, `align-items: center`, `gap: 8px`, `flex-wrap: wrap`
-
-#### A. Dot Slots (원형 마스킹)
-* **공통 규격:** Container Padding `2px`, Inner Dot `16x16px`, Radius `9999px`
-* **Disabled / Empty:** 
-  * Background `var(--surface-neutral-disabled, rgba(102, 112, 133, 0.10))`
-  * Border `1px solid var(--border-neutral-disabled, #D1D5DB)`
-* **Entered (입력 완료):**
-  * Background `var(--icon-neutral-primary, #111827)`
-* **Error:**
-  * Background `var(--icon-status-negative, #E53838)`
-
-#### B. Box Slots (사각 입력 박스)
-* **공통 규격:** Width `48px`, Height `56px` (Min-width/height 동일), Radius `12px`
-* **Empty (대기 상태):**
-  * Background `var(--surface-neutral-secondary-muted, #F4F6F9)`
-  * Border `1px solid var(--border-neutral-primary-muted, #D1D5DB)`
-* **Focus / Active (입력 중 포커스):**
-  * Background `var(--surface-neutral-quaternary-muted, white)`
-  * Border `3px solid var(--border-accent-brand-alt, #111827)`
-  * Box Shadow `0px 4px 6px rgba(12, 17, 29, 0.10)`
-* **Entered (숫자 입력 완료):**
-  * Background `var(--surface-neutral-secondary-muted, #F4F6F9)`
-  * Outline `1px solid var(--border-neutral-primary-muted, #D1D5DB)` (Offset: `-1px`)
-  * Typography: `Pretendard`, SemiBold (`600`), `22px` / `31px`, Color `var(--text-neutral-primary, #111827)`
-* **Error (오류 상태):**
-  * Background `var(--surface-status-negative-muted, #FFF6F5)`
-  * Outline `1px solid var(--border-status-negative-muted, #FFBDBD)` (Offset: `-1px`)
-  * Typography: `Pretendard`, SemiBold (`600`), `22px` / `31px`, Color `var(--text-status-negative, #E53838)`
-
-#### C. Password Helper Text Area
-* **Info (안내 메시지):**
-  * Typography: `KBFG Text`, Light (`300`), `13px` / `18px`, Color `var(--text-neutral-quaternary, #6B7280)`
-* **Error (에러 메시지):**
-  * 아이콘: `12x12px` (Bounding `9x9px`), Color `var(--icon-status-negative, #E53838)`
-  * Typography: `KBFG Text`, Medium (`500`), `13px` / `18px`, Color `var(--text-status-negative, #E53838)`
+### 1. Amount Type (금액 입력형)
+* **Container:** Width `390px` (`Fill container`), Padding Top/Bottom `16px` (`$spacing.spacingXl`), Left/Right `20px` (`$spacing.spacing2xl`)
+* **Vertical Gap:** `12px` (`$spacing.spacingLg`)
+* **Align:** Horizontal/Vertical Center 정렬
+* **Primary Display Area (입력 금액):**
+  * Placeholder: `"얼마를 보낼까요?"`, Typography `KBFG Text`, Size `32px` (`$type.fontSizeDisplay5xl`), Weight `700` (`$type.fontWeightBold`), Line Height `45px`
+  * Value Text (Focused / Entered): Typography `Pretendard`, Size `38px` (`$type.fontSizeDisplay6xl`), Weight `600` (`$type.fontWeightSemibold`), Line Height `53px`
+  * Caret (Focused 시): Width `1.6px`, Height `45px`, Color `var(--icon-accent-brand-alt)` (`#111827`)
+  * Unit (`"원"`): Typography `KBFG Text`, Size `26px` (`$type.fontSizeDisplay4xl`), Weight `500` (`$type.fontWeightMedium`), Line Height `36px`
+* **Helper & Feedback Area:**
+  * 출금가능금액 정보 (Placeholder):
+    * 라벨: `"출금가능금액"`, `KBFG Text`, Size `13px`, Weight `300`, Color `var(--text-neutral-quaternary)` (`#6b7280`)
+    * 수치: `"3,000,000원"`, `KBFG Text`, Size `13px`, Weight `500`, Color `var(--text-neutral-quaternary)`
+    * 한도제한 뱃지: Height `20px`, Padding Horizontal `6px` (`$spacing.spacingSm`), Radius `4px` (`$radius.radius3xs`), Background `var(--surface-accent-red-muted)` (`#fff6f5`), Text `"한도제한"` (`11px`, Bold, `var(--text-accent-red)`)
+  * 한글 환산 금액 표기 (Focused / Entered):
+    * Text: `"240원"`, `"240만원"`, Typography `KBFG Text`, Size `13px`, Weight `500`, Color `var(--text-neutral-quaternary)` (`#6b7280`)
+  * 에러 메시지 (Error):
+    * Icon: `12px x 12px` (Vector: `9px x 9px`), Color `var(--icon-status-negative)` (`#e53838`)
+    * Typography: `KBFG Text`, Size `13px`, Weight `500`, Color `var(--text-status-negative)` (`#e53838`)
 
 ---
 
-## 4. Design Tokens Mapping
-
-| Token Name | Fallback | Property | Component Usage |
-| :--- | :--- | :--- | :--- |
-| `--background-neutral-white` | `#FFFFFF` | `background` | 컴포넌트 전체 배경 |
-| `--text-neutral-primary` | `#111827` | `color` | Amount 입력값 및 Password Box 숫자 텍스트 |
-| `--text-neutral-secondary-on` | `#D1D5DB` | `color` | Amount 미입력 플레이스홀더 문구 |
-| `--text-neutral-quaternary` | `#6B7280` | `color` | 출금가능금액, 한글 환산 표기, Password 안내 문구 |
-| `--text-status-negative` | `#E53838` | `color` | 에러 상태 메인 금액, Box 숫자 및 에러 메시지 |
-| `--text-accent-red` | `#E53838` | `color` | '한도제한' 뱃지 텍스트 |
-| `--surface-accent-red-muted` | `#FFF6F5` | `background` | '한도제한' 뱃지 배경 |
-| `--surface-neutral-secondary-muted`| `#F4F6F9` | `background` | Password Box Empty / Entered 기본 배경 |
-| `--surface-neutral-quaternary-muted`| `#FFFFFF` | `background` | Password Box Focus 활성 배경 |
-| `--surface-neutral-disabled` | `rgba(102, 112, 133, 0.10)` | `background` | Password Dot Empty/Disabled 배경 |
-| `--surface-status-negative-muted` | `#FFF6F5` | `background` | Password Box Error 배경 |
-| `--border-neutral-primary-muted` | `#D1D5DB` | `border` / `outline` | Password Box Empty / Entered 기본 보더 |
-| `--border-neutral-disabled` | `#D1D5DB` | `border-color` | Password Dot Empty 외곽선 |
-| `--border-accent-brand-alt` | `#111827` | `border-color` | Password Box Focus 보더 (3px) |
-| `--border-status-negative-muted` | `#FFBDBD` | `outline-color` | Password Box Error 아웃라인 |
-| `--icon-neutral-primary` | `#111827` | `background` | Password Dot Entered 채움 |
-| `--icon-accent-brand-alt` | `#111827` | `background` | Amount Typing 텍스트 커서(Caret) |
-| `--icon-status-negative` | `#E53838` | `background` / `fill` | Password Dot Error 채움 및 에러 경고 아이콘 |
-| `--color-util-purple` | `#893DE7` | `border-color` | 가이드 영역 아웃라인 |
+### 2. Password Type (PIN / 패스워드 입력형)
+* **Container:** Width `390px` (`Fill container`), Padding Top/Bottom `28px` (`$spacing.spacing4xl`), Left/Right `20px` (`$spacing.spacing2xl`)
+* **Vertical Gap:** `20px` (`$spacing.spacing2xl`)
+* **Align:** Horizontal/Vertical Center 정렬, Flex-Wrap 대응
+* **Primary Display Area (PIN 인디케이터):**
+  * Indicator Item Gap: `8px` (`$spacing.spacingMd`)
+  * Dot Style (원형 도트):
+    * Size: `16px x 16px`, Radius `9999px` (`$radius.radiusFull`), Padding `2px`
+    * Disabled / Empty: Background `var(--surface-neutral-disabled)` (10%), Border `1px solid var(--border-neutral-disabled)` (`#d1d5db`)
+    * Entered: Background `var(--icon-neutral-primary)` (`#111827`), Border None
+    * Error: Background `var(--icon-status-negative)` (`#e53838`), Border None
+  * Box Style (사각 넘버 박스):
+    * Dimensions: Width `48px`, Height `56px`, Radius `12px` (`$radius.radiusMd`)
+    * Empty: Background `var(--surface-neutral-secondary-muted)` (`#f4f6f9`), Border `1px solid var(--border-neutral-primary-muted)` (`#d1d5db`)
+    * Active Focused (현재 입력칸): Background `var(--surface-neutral-quaternary-muted)` (`#ffffff`), Border `3px solid var(--border-accent-brand-alt)` (`#111827`), Box Shadow `0px 4px 6px rgba(12, 17, 29, 0.10)`
+    * Entered: Typography `Pretendard`, Size `22px` (`$type.fontSizeTitle3xl`), Weight `600`, Color `var(--text-neutral-primary)` (`#111827`)
+    * Error: Background `var(--surface-status-negative-muted)` (`#fff6f5`), Border `1px solid var(--border-status-negative-muted)` (`#ffbdbd`), Text Color `var(--text-status-negative)` (`#e53838`)
+* **Helper & Feedback Area:**
+  * 안내 메시지 (Normal):
+    * Typography: `KBFG Text`, Size `13px`, Weight `300`, Color `var(--text-neutral-quaternary)` (`#6b7280`)
+  * 에러 메시지 (Error):
+    * Icon: `12px x 12px`, Color `var(--icon-status-negative)` (`#e53838`)
+    * Typography: `KBFG Text`, Size `13px`, Weight `500`, Color `var(--text-status-negative)` (`#e53838`)
 
 ---
 
-## 5. Interaction & Implementation Notes
+## 4. 토큰 바인딩 종합 (Token Mapping Matrix)
 
-* **Amount 타입 한글 변환 규칙:** 수치 입력 즉시 콤마 포맷팅과 함께 하단에 만/억/조 단위의 축약 텍스트(예: `240만원`)를 실시간 매핑합니다.
-* **Password 타입 슬롯 포커스 이동:**
-  * Box 입력 방식은 현재 입력할 차례의 박스에 `type="outline"` (두께 3px 및 그림자) 포커스 스타일을 부여합니다.
-  * 한 자리 입력이 완료될 때마다 다음 슬롯으로 포커스를 자동 이동합니다.
-* **보안 키패드 연동:** 입력 시 시스템 기본 키보드가 아닌 보안 가상 키패드가 호출되도록 인풋 이벤트를 제어합니다.
+| 구분 (Type) | UI 요소 (Element) | Placeholder / Empty | Focused | Entered | Error |
+|---|---|---|---|---|---|
+| **Amount** | 입력 금액 텍스트 | `var(--text-neutral-secondary-on)` | `var(--text-neutral-primary)` | `var(--text-neutral-primary)` | `var(--text-status-negative)` |
+| | 단위 접미사 ('원') | - | - | `var(--text-neutral-primary)` | `var(--text-status-negative)` |
+| | 입력 커서 (Caret) | - | `var(--icon-accent-brand-alt)` | - | - |
+| | 서브 환산 / 안내 텍스트 | `var(--text-neutral-quaternary)` | `var(--text-neutral-quaternary)` | `var(--text-neutral-quaternary)` | `var(--text-status-negative)` |
+| | 에러 아이콘 | - | - | - | `var(--icon-status-negative)` |
+| | 한도제한 뱃지 배경/텍스트 | `var(--surface-accent-red-muted)` / `var(--text-accent-red)` | - | - | - |
+| **Password** | 원형 도트 (Dot) | `var(--surface-neutral-disabled)` (Border: `var(--border-neutral-disabled)`) | - | `var(--icon-neutral-primary)` | `var(--icon-status-negative)` |
+| | 사각 박스 (Box) 배경 | `var(--surface-neutral-secondary-muted)` | `var(--surface-neutral-quaternary-muted)` | `var(--surface-neutral-secondary-muted)` | `var(--surface-status-negative-muted)` |
+| | 사각 박스 (Box) 테두리 | `1px var(--border-neutral-primary-muted)` | `3px var(--border-accent-brand-alt)` | `1px var(--border-neutral-primary-muted)` | `1px var(--border-status-negative-muted)` |
+| | 사각 박스 (Box) 숫자 | - | - | `var(--text-neutral-primary)` | `var(--text-status-negative)` |
+| | 하단 안내 / 에러 텍스트 | `var(--text-neutral-quaternary)` | `var(--text-neutral-quaternary)` | `var(--text-neutral-quaternary)` | `var(--text-status-negative)` |
+
+---
+
+## 5. AI UI 생성 규칙 (Generation Rules)
+
+1. **송금 입력 화면 구성 시:**  
+   `type: 'amount'`를 배치하고, 키패드 연동 입력 시 실시간으로 입력값 하단에 한글 환산 표기(`240만원` 등)를 자동 갱신하도록 처리하세요.
+2. **비밀번호/생체인증 PIN 화면 구성 시:**  
+   `type: 'password'`를 배치하고, 금융 간편비밀번호(6자리)는 기본 `pinStyle: 'dot'`, 주민번호/보안카드형은 `pinStyle: 'mixed'` 또는 `'box'`를 적용하세요.
+3. **숫자 타이포그래피 원칙:**  
+   금액 수치 및 박스 내부 입력 숫자는 반드시 `fontFamilyNumeric`(`Pretendard`)을 우선 바인딩하세요.
