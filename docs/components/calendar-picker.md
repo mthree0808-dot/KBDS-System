@@ -4,7 +4,7 @@
 - Library Name: 
 - Page: 
 - Component Name: 
-- Figma Link: https
+- Figma Link:
 
 ## 2. 컴포넌트 구조 (Hierarchy)
 - DateRangePicker (Root Container)
