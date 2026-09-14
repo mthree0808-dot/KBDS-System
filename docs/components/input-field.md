@@ -1,140 +1,245 @@
-# Component: Form / InputField
+# Component Specification: InputField & InputField Items
 
-본 문서는 서비스 전반에서 사용되는 단일 라인 텍스트 입력 필드(InputField) 명세입니다.
-피그마의 Instance Swap 구조를 지원하기 위해 상위 컨테이너 구조(Label / Input Body / Help Message)와 내부 슬롯 합성 패턴(Prefix / Core / Suffix), 그리고 상태별 토큰 매핑 매트릭스를 정의합니다.
+Figma Component Set 메타데이터 및 Claude Design-to-Code 파이프라인 연동을 위한 UI 컴포넌트 상세 명세서입니다.
 
 ---
 
-## 1. 컴포넌트 구조 (Hierarchy)
+## 1. Figma Metadata
 
-InputField는 세로 방향(Auto Layout Vertical)의 3단 복합 구조로 조립됩니다.
+- **Component Set Name**: `Form / InputField` (Items: `InputField.Item`)
+- **Figma Layer Architecture**: 
+  - `InputField` (Root Frame: Vertical Auto Layout / Width: 350px, Gap: 8px)
+  - `InputField.Item` (Input Control Base: Horizontal/Vertical Auto Layout / Min-Height: 56px)
+- **Design System Domain**: Banking / Financial Services Framework (KBFG System)
+- **Default Frame Setup**: Fixed Width (`350px`), Height `Hug Contents` (Textarea 등 일부 제외)
 
+---
+
+## 2. Component Hierarchy
+
+### 2.1 Complete Form Field Structure (InputField Root)
 ```text
-[InputField Container] (Gap: 8px)
-  ├── 1. Title Area (Label + Required + Tooltip)
-  ├── 2. Input Box (Min-Height: 56px, Radius: 12px)
-  │     ├── [Prefix Slot]   : 은행/카드 로고, 통화 기호, 국가번호 등
-  │     ├── [Core Slot]     : 텍스트 입력값 / Placeholder, 커서 인디케이터
-  │     └── [Suffix Slot]   : 삭제(X), 타이머, 단위('원'), 비밀번호 마스킹, 인라인 버튼 등
-  └── 3. Message Area (Error Message + Sub Label / Counter)
+InputField (Container: Width 350px, Column, Gap 8px)
+├── Header Area (data-required="true", data-tooltip="true", Gap 8px)
+│   └── Title Row (Flex Row, Gap 2px, Align Center)
+│       ├── Label Text ("타이틀입니다", 14px/20px, Bold 700)
+│       ├── Required Indicator ("(필수)", 11px/15px, Red 500)
+│       └── Tooltip Action Button (16x16px, Secondary, Radius 4px)
+│           └── Suffix Icon Viewport (16x16px, Inner Vector 12x12px)
+├── Control Area: InputField.Item (Min-Height 56px, Radius 12px, Data States)
+│   ├── Prefix Slot (Segmented Control / Action / None)
+│   ├── Content Core (Flex 1 1 0, Text Node, Caret Cursor Indicator 1.6x22px)
+│   └── Suffix Slot (Delete Button / Action Button / Unit Text / Caret Icon / Timer)
+└── Footer Area (Column, Gap 2px or 10px)
+    ├── [Optional] Error Message Row (Icon 12x12px + Error Text 13px/18px, Gap 1px)
+    └── [Optional] Helper Caption Row (data-variant="single", Padding H 6px, Text 13px/18px)
+```
+
+### 2.2 Input Control Unit (`InputField.Item` Variations)
+```text
+InputField.Item (Control Base: Min-Height 56px, Radius 12px)
+├── [Case A: Basic Input]
+│   ├── Content (Flex 1 1 0, 16px/22px Text, Caret 1.6x22px)
+│   └── Clear Action (data-variant="secondary", 24x24px, Icon 18x18px)
+├── [Case B: Unit Text (금액/기간)]
+│   ├── Value Text Area (Align Right, 16px/22px)
+│   └── Unit Label ("원" / "월", 16px/22px, Bold 700)
+├── [Case C: Account Dropdown]
+│   ├── Left Column (Bank CI Badge 20x20px + Sub Label 15px + Main Text 16px + Helper 12px)
+│   └── Right Caret Icon (24x24px Viewport, Rotated -90deg Vector 7.29x13.5px)
+├── [Case D: Segmented Prefix/Suffix]
+│   ├── Segment Container (Background #F4F6F9, Radius 10px, Padding 4px, Gap 2px)
+│   │   ├── Active Segment (White Fill, Shadow, Radius 6px, Min-Width 26px, Text 12px Bold)
+│   │   └── Inactive Segment (Shadow, Radius 6px, Min-Width 26px, Text 12px Medium)
+│   └── Text Node Area
+├── [Case E: Button / ButtonWithTimer Suffix]
+│   ├── [Optional] Timer Display ("3:00", 15px/21px, Positive Blue)
+│   └── Action Button (Min-Height 32px, Radius 8px, Padding H 8px V 2px, Text 12px Bold)
+├── [Case F: Multi-Column / Complex Layout]
+│   ├── Range Control (Input Item + "~" Delimiter 17px/24px Bold + Input Item)
+│   ├── Email Row (ID Item + "@" Delimiter 17px/24px Bold + Domain Item + Direct Input)
+│   ├── Tel / Account Number Block (Item + "-" + Item + "-" + Item, Inner Gap 4px)
+│   └── Preset Amount Chips (4-Column Equal Grid, Min-Height 32px, Radius 9999px)
+└── [Case G: Multi-line Textarea]
+    └── Expandable Box (Height 140px, Padding H 16px V 12px, Text 16px Regular 300)
 ```
 
 ---
 
-## 2. 속성 (Properties & Variants)
+## 3. Properties & Variants
 
-| Property | Type | Options | Default | 설명 |
-|---|---|---|---|---|
-| `state` | String | `default`, `focused`, `entered`, `error`, `disabled` | `default` | 인터랙션 상태 |
-| `required` | Boolean | `true`, `false` | `false` | 필수 입력 여부 (`(필수)` 텍스트 표시) |
-| `tooltip` | Boolean | `true`, `false` | `false` | 타이틀 우측 도움말 툴팁 아이콘 표시 여부 |
-| `hasPrefix` | Boolean | `true`, `false` | `false` | 좌측 Prefix 요소 표시 여부 |
-| `hasSuffix` | Boolean | `true`, `false` | `false` | 우측 Suffix 요소 표시 여부 |
-| `hasTextDel` | Boolean | `true`, `false` | `true` | 활성 입력 시 전체 삭제(X) 아이콘 제공 여부 |
+### 3.1 Field Container & Control Attributes (`data-*`)
 
----
-
-## 3. 상세 레이아웃 스펙
-
-### 전체 컨테이너
-* **Width:** `Fill container` (기본 기준폭: `350px`)
-* **Layout:** Auto Layout Vertical, Align Start, Justify Start
-* **Gap:** `8px` (`$spacing.spacingMd`)
-
-### 1. 상단 타이틀 영역 (Title Area)
-* **Dimensions:** Width `Fill container`, Height `Hug contents`
-* **Layout:** Auto Layout Horizontal, Align Center, Gap `2px` (`$spacing.spacing2xs`)
-* **Title Text:**
-  * Typography: `KBFG Text`, Size `14px` (`$type.fontSizeBodyXsFixed`), Weight `700` (`$type.fontWeightBold`), Line Height `20px`
-  * Color: `var(--text-neutral-primary)` (`#111827`)
-* **Required Indicator:**
-  * Text: `(필수)`
-  * Typography: `KBFG Text`, Size `11px` (`$type.fontSizeBody4xsFixed`), Weight `500` (`$type.fontWeightMedium`), Line Height `15px`
-  * Color: `var(--text-accent-red)` (`#e53838`)
-* **Tooltip Icon Button:**
-  * Box: `16px x 16px`, Radius `4px` (`$radius.radius3xs`)
-  * Icon Vector: `12px x 12px`, Color `var(--icon-neutral-quaternary)` (`#9ca3af`)
-
-### 2. 인풋 박스 본체 (Input Box)
-* **Dimensions:** Width `Fill container`, Min Height `56px`
-* **Padding:** All `16px` (`$spacing.spacingXl`)
-* **Corner Radius:** `12px` (`$radius.radiusMd`)
-* **Layout:** Auto Layout Horizontal, Align Center, Gap `8px` (`$spacing.spacingMd`)
-* **Core Text Area (입력 영역):**
-  * Typography: `KBFG Text`, Size `16px` (`$type.fontSizeBodyMdFixed`), Line Height `22px`
-  * Value Weight: 미입력(Placeholder) 시 `500` (`$type.fontWeightMedium`), 값 입력(Entered) 시 `700` (`$type.fontWeightBold`)
-  * Caret (커서): Width `1.6px`, Height `22px`, Color `var(--icon-accent-brand-alt)` (`#111827`)
-
-### 3. 하단 메시지 영역 (Message Area)
-* **Dimensions:** Width `Fill container`, Height `Hug contents`
-* **Layout:** Auto Layout Vertical, Gap `2px` (에러 발생 시) 또는 `10px`
-* **Padding:** Left / Right `6px` (`$spacing.spacingSm`)
-* **Error Message:**
-  * Icon: `12px x 12px` (Vector: `9px x 9px`), Color `var(--icon-status-negative)` (`#e53838`)
-  * Typography: `KBFG Text`, Size `13px` (`$type.fontSizeBody2xsFixed`), Weight `500`, Line Height `18px`
-  * Color: `var(--text-status-negative)` (`#e53838`)
-* **Sub Label / Helper Text:**
-  * Typography: `KBFG Text`, Size `13px` (`$type.fontSizeBody2xsFixed`), Weight `500`, Line Height `18px`
-  * Color: `var(--text-neutral-quaternary)` (`#6b7280`)
+| Component Scope | Attribute | Type | Default Value | Value Range | Description |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **InputField Root** | `data-required` | Boolean | `true` | `true`, `false` | 필수 입력 항목 `(필수)` 표기 여부 |
+| | `data-tooltip` | Boolean | `true` | `true`, `false` | 도움말 툴팁 아이콘 노출 제어 |
+| | `data-hassuffix` | Boolean | `false` | `true`, `false` | 헤더 영역 보조 컨트롤 여부 |
+| | `data-emailfiled2_show` | Boolean | `true` | `true`, `false` | 복합 이메일 도메인 필드 노출 제어 |
+| | `data-hasquickbutton` | Boolean | `true` | `true`, `false` | 금액 빠른 선택 칩 버튼 활성화 플래그 |
+| **InputField.Item** | `data-variant` | String | `basic` | `basic`, `column`, `account`, `textarea`, `basic-unittext` | 입력 필드 시각/기능 템플릿 구조 |
+| | `data-disabled` | Boolean | `false` | `true`, `false` | 비활성화 상태 (Opacity 0.50, 음영 채움) |
+| | `data-focused` | Boolean | `false` | `true`, `false` | 포커스 및 캐럿 커서 활성화 상태 |
+| | `data-entered` | Boolean | `false` | `true`, `false` | 값 입력 완료 상태 (폰트 가중치 변경) |
+| | `data-error` | Boolean | `false` | `true`, `false` | 검증 실패 상태 (Border Red 2px 아웃라인) |
+| | `data-haslogo` | Boolean | `true` | `true`, `false` | 계좌/기관 CI 엠블럼 표시 |
+| | `data-prefix` | Boolean | `false` | `true`, `false` | 좌측 프리픽스 컨트롤 노출 여부 |
+| | `data-suffix` | Boolean | `false` | `true`, `false` | 우측 액션/아이콘 컨트롤 노출 여부 |
+| | `data-textdel` | Boolean | `true` | `true`, `false` | 입력 텍스트 일괄 삭제(Clear) 버튼 사용 여부 |
+| **Sub-Controls** | `data-variant` (Suffix) | String | - | `icon`, `button`, `buttonWithTimer`, `segmentedControl` | 우측 애드온 컨트롤 변형값 |
+| | `data-selected` | Boolean | `false` | `true`, `false` | 세그먼트 버튼 선택 활성화 여부 |
 
 ---
 
-## 4. 토큰 바인딩 종합 (Token Mapping Matrix)
+## 4. Detailed Layout Specifications
 
-| 구분 (Area) | UI 요소 (Element) | Default / Normal | Focused | Entered | Error | Disabled |
-|---|---|---|---|---|---|---|
-| **Title Area** | 타이틀 텍스트 | `var(--text-neutral-primary)` | `var(--text-neutral-primary)` | `var(--text-neutral-primary)` | `var(--text-neutral-primary)` | `var(--text-neutral-disabled)` |
-| | 필수 표시 `(필수)` | `var(--text-accent-red)` | `var(--text-accent-red)` | `var(--text-accent-red)` | `var(--text-accent-red)` | `var(--text-neutral-disabled)` |
-| | 툴팁 아이콘 | `var(--icon-neutral-quaternary)` | `var(--icon-neutral-quaternary)` | `var(--icon-neutral-quaternary)` | `var(--icon-neutral-quaternary)` | `var(--icon-neutral-disabled)` |
-| **Input Box** | 배경 (Background) | Transparent | Transparent | Transparent | Transparent | `var(--surface-neutral-disabled)` |
-| | 테두리 (Border/Outline) | `1px solid var(--border-neutral-primary-muted)` | `1px solid var(--border-neutral-primary-muted)` | `1px solid var(--border-neutral-primary-muted)` | `2px solid var(--border-status-negative)` | None (Outline 제거) |
-| | 텍스트 / 플레이스홀더 | `var(--text-neutral-placeholder)` | `var(--text-neutral-primary)` | `var(--text-neutral-primary)` | `var(--text-neutral-primary)` | `var(--text-neutral-placeholder)` |
-| | 커서 (Caret) | - | `var(--icon-accent-brand-alt)` | - | `var(--icon-accent-brand-alt)` | - |
-| **Slots** | 삭제(X) 아이콘 | - | `var(--icon-neutral-quaternary)` | - | - | - |
-| | 단위 텍스트 ('원') | `var(--text-neutral-primary)` | `var(--text-neutral-primary)` | `var(--text-neutral-primary)` | `var(--text-status-negative)` | `var(--text-neutral-disabled)` |
-| | 인라인 액션 버튼 배경 | `var(--surface-accent-brand)` | `var(--surface-accent-brand)` | `var(--surface-accent-brand)` | `var(--surface-accent-brand)` | `var(--surface-neutral-disabled)` |
-| **Message Area**| 에러 아이콘 / 텍스트 | - | - | - | `var(--text-status-negative)` / `var(--icon-status-negative)` | - |
-| | 서브 레이블 / 헬퍼 | `var(--text-neutral-quaternary)` | `var(--text-neutral-quaternary)` | `var(--text-neutral-quaternary)` | `var(--text-neutral-quaternary)` | `var(--text-neutral-disabled)` |
+### 4.1 Root Container & Header/Footer Metrics
+
+- **Field Total Width**: Fixed `350px`
+- **Field Gap**: `8px` (Vertical Column Layout)
+- **Header Structure**:
+  - Min-Height: `20px`
+  - Gap: `8px`
+  - Title Text: Font `'KBFG Text'`, Size `14px`, Weight `700`, Line-height `20px`
+  - Required Tag: Font `'KBFG Text'`, Size `11px`, Weight `500`, Line-height `15px`
+  - Tooltip Button: Hit-area `16x16px`, Radius `4px`, Inner Vector Inset `top 2px, left 2px`, Size `12x12px`
+- **Footer Structure**:
+  - Gap: `2px` (Error + Helper 간) 또는 `10px` (Helper 단독)
+  - Horizontal Padding: `6px`
+  - Error Text: Font `'KBFG Text'`, Size `13px`, Weight `500`, Line-height `18px`
+  - Error Icon: Viewport `12x12px`, Vector `9x9px` (Inset Top `1.50px`, Left `1.50px`)
+  - Helper Caption: Font `'KBFG Text'`, Size `13px`, Weight `500`, Line-height `18px`
+
+### 4.2 Control Box Dimensions & Inset Paddings
+
+| Variant Type | Min-Height / Height | Padding Inset | Border Radius | Internal Gap |
+| :--- | :--- | :--- | :--- | :--- |
+| **Basic (Default)** | Min `56px` | Top `16px`, Bottom `16px`, Left `16px`, Right `16px` | `12px` | `8px` |
+| **Basic (Action Suffix)** | Min `56px` | Top `8px`, Bottom `8px`, Left `16px`, Right `12px` | `12px` | `8px` |
+| **Segment Attached** | Min `56px` | Top `8px`, Bottom `8px`, Left `16px`, Right `16px` | `12px` | `8px` |
+| **Column Splitted** | Min `56px` | Top `16px`, Bottom `16px`, Left `8px`, Right `8px` | `12px` | `8px` |
+| **Textarea** | Fixed `164px` (Inner 140px) | Top `12px`, Bottom `12px`, Left `16px`, Right `16px` | `12px` | - |
+
+### 4.3 Sub-Elements Layout & Typography Specifications
+
+#### A. Input Core & Blinking Caret Indicator
+- **Text Layer**:
+  - Font Family: `'KBFG Text', -apple-system, sans-serif`
+  - Font Size: `16px`
+  - Line Height: `22px`
+  - Font Weight: Placeholder / Empty 상태 시 `500` (Medium), Textarea `300` (Light), Entered 상태 시 `700` (Bold)
+- **Caret Bar (Focused State)**:
+  - Width: `1.60px`
+  - Height: `22px`
+  - Background: `var(--icon-accent-brand-alt, #111827)`
+  - Gap from text: `1px`
+
+#### B. Suffix Clear Action Button (`data-size="24"`, `secondary`)
+- Hit Target Box: `24x24px`
+- Border Radius: `4px`
+- Vector Area: Width `18px`, Height `18px`, Inset Top `3px`, Left `3px`
+- Vector Fill: `var(--icon-neutral-quaternary, #9CA3AF)`
+
+#### C. Segmented Switcher (`data-variant="segmentedControl"`)
+- Track Base: Background `#F4F6F9`, Radius `10px`, Padding `4px`, Gap `2px`
+- Segment Item:
+  - Min-Width: `26px`, Padding `4px`
+  - Border Radius: `6px`
+  - Active: Background `#FFFFFF`, Box-Shadow `0px 2px 4px -1px rgba(12, 17, 29, 0.10)`
+  - Inactive: Background `transparent`, Box-Shadow `0px 4px 6px rgba(12, 17, 29, 0.10)`
+  - Label Typography: Font Size `12px`, Line Height `17px`, Active Weight `700`, Inactive Weight `500`
+
+#### D. Quick Preset Chips (`data-variant="tertiary"`)
+- Layout: 4-Column Equal Flex (`flex: 1 1 0`), Total Container Gap `4px`
+- Dimensions: Min-Height `32px`, Radius `9999px` (Pill), Padding Top/Bottom `2px`, Left/Right `8px`
+- Outline: `1px solid var(--border-neutral-primary-muted, #D1D5DB)` (Offset `-1px`)
+- Typography: Font Size `12px`, Line Height `17px`, Font Weight `700`, Align Center
 
 ---
 
-## 5. ITEM 슬롯 스왑 패턴 (Slot Swap Cases)
+## 5. Token Mapping Matrix
 
-피그마 그리드에 나열된 모든 세부 케이스는 인풋 박스 내부의 3가지 슬롯 조합으로 매핑됩니다.
+| Component State | CSS Token Variable | Fallback HEX / RGBA | Target Applied Layer | CSS Property |
+| :--- | :--- | :--- | :--- | :--- |
+| **Field Wrapper Border** | `var(--color-util-purple, #893DE7)` | `#893DE7` | Master Canvas Guide Frame | `border-color` |
+| **Default Border** | `var(--border-neutral-primary-muted, #D1D5DB)` | `#D1D5DB` | Input Item Frame Outline | `outline-color: 1px` |
+| **Focused Caret** | `var(--icon-accent-brand-alt, #111827)` | `#111827` | Caret Vertical Bar | `background` |
+| **Error Border** | `var(--border-status-negative, #E53838)` | `#E53838` | Input Item Frame Outline | `outline-color: 2px` |
+| **Error Icon & Text** | `var(--icon-status-negative, #E53838)`<br>`var(--text-status-negative, #E53838)` | `#E53838` | Error Viewport Vector<br>Error Text Label | `background`<br>`color` |
+| **Required Label** | `var(--text-accent-red, #E53838)` | `#E53838` | Header `(필수)` Text | `color` |
+| **Disabled Surface** | `var(--surface-neutral-disabled, rgba(102, 112, 133, 0.10))` | `rgba(102, 112, 133, 0.10)` | Disabled Input Item Frame | `background-color` |
+| **Disabled Text** | `var(--text-neutral-disabled, #9CA3AF)` | `#9CA3AF` | Disabled Action / Chip Text | `color` |
+| **Text Primary** | `var(--text-neutral-primary, #111827)` | `#111827` | Title / Entered Text / Delimiters | `color` |
+| **Text Placeholder** | `var(--text-neutral-placeholder, #9CA3AF)` | `#9CA3AF` | Unfilled Input Text / Unit Label | `color` |
+| **Text Helper/Caption** | `var(--text-neutral-quaternary, #6B7280)` | `#6B7280` | Bottom Helper Label / Delimiters | `color` |
+| **Timer Text** | `var(--text-status-positive, #1F6AFF)` | `#1F6AFF` | Timer Countdown ("3:00") | `color` |
+| **Icon Standard Fill** | `var(--icon-neutral-primary, #111827)` | `#111827` | Arrow / Suffix Action Vector | `background` |
+| **Icon Muted Fill** | `var(--icon-neutral-quaternary, #9CA3AF)` | `#9CA3AF` | Tooltip / Clear Button Vector | `background` |
 
-```text
-[Prefix Slot] ─── (Gap 8px) ─── [Core Slot] ─── (Gap 8px) ─── [Suffix Slot]
+---
+
+## 6. Implementation Guidelines
+
+### 6.1 State Switching & Outline Rendering Rules
+- **Error vs Default Outline**: 
+  - 기본 상태는 `outline: 1px solid var(--border-neutral-primary-muted)` 및 `outline-offset: -1px`를 사용합니다.
+  - `data-error="true"` 상태로 변경 시 테두리가 두꺼워지면서 레이아웃이 밀리는 것을 방지하기 위해 `outline: 2px solid var(--border-status-negative)` 및 `outline-offset: -2px` 규칙을 반드시 유지해야 합니다.
+- **Disabled State Handling**:
+  - `data-disabled="true"`인 경우 배경색을 `var(--surface-neutral-disabled)`로 채우고, 미입력 상태(`data-entered="false"`)일 때는 전체 레이어 투명도를 `opacity: 0.50`으로 강제 처리합니다. 단, 이미 입력된 텍스트(`data-entered="true"`)가 있는 상태에서 비활성화된 경우 투명도 오버라이드 없이 고대비 텍스트 색상을 보존합니다.
+
+### 6.2 Complex Inline Layout Splitting
+- **Delimiter Centering**:
+  - 기간 선택(`~`), 이메일(`@`), 전화번호/계좌번호(`-`) 구분자는 `font-size: 17px`, `line-height: 24px`, `font-weight: 700`으로 고정하며 수직 중앙 정렬합니다.
+- **Segmented / Action Add-on Clipping**:
+  - 버튼형 및 세그먼트 컨트롤형 서픽스가 결합될 경우 입력 필드 상/하 패딩은 기본 `16px`에서 `8px`로 자동 축소되어 컨트롤의 Hit Target(`32px`) 높이를 충돌 없이 유지합니다.
+
+```css
+/* InputField.Item Base Styling & States */
+.inputfield-item {
+  width: 100%;
+  min-height: 56px;
+  padding: 16px;
+  border-radius: 12px;
+  outline: 1px solid var(--border-neutral-primary-muted, #D1D5DB);
+  outline-offset: -1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+/* Error State */
+.inputfield-item[data-error="true"] {
+  outline: 2px solid var(--border-status-negative, #E53838);
+  outline-offset: -2px;
+}
+
+/* Disabled State */
+.inputfield-item[data-disabled="true"] {
+  background: var(--surface-neutral-disabled, rgba(102, 112, 133, 0.10));
+  outline: none;
+}
+.inputfield-item[data-disabled="true"][data-entered="false"] {
+  opacity: 0.50;
+}
+
+/* Textarea Variant */
+.inputfield-item[data-variant="textarea"] {
+  min-height: 164px;
+  padding: 12px 16px;
+  align-items: flex-start;
+}
+
+/* Caret Cursor Keyframes */
+.inputfield-caret {
+  width: 1.6px;
+  height: 22px;
+  background-color: var(--icon-accent-brand-alt, #111827);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 ```
-
-### Prefix Slot 유형
-* **None:** 기본 단일 텍스트 입력창
-* **Icon / Logo:** 은행 심볼마크, 카드사 로고, 검색(Magnifier) 아이콘
-* **Fixed Text:** 국가번호(`+82`), 프로토콜(`https://`)
-
-### Core Slot 유형
-* **Single Text:** 단일 텍스트/숫자 (기본값)
-* **Split Field (분할형):**
-  * 주민등록번호 앞자리(6자리) + `-` + 뒷자리(1자리 or 마스킹 6자리)
-  * 사업자등록번호(3자리 - 2자리 - 5자리)
-  * 카드번호(4자리씩 4분할)
-
-### Suffix Slot 유형 (복수 조합 가능)
-* **Delete Button:** 입력값 일괄 삭제 X 버튼 (`24px x 24px`, 아이콘 `18px`, `var(--icon-neutral-quaternary)`)
-* **Unit Text:** 단위 표기 (`"원"`, `"%"`, `"개월"`, `"건"`) - Font Weight `700`, `var(--text-neutral-primary)`
-* **Timer:** 남은 인증 시간 (`"03:00"`) - `var(--text-status-negative)`
-* **Dropdown Arrow:** 선택형 인풋의 펼침 화살표 Chevron 아이콘
-* **Security Masking Toggle:** 비밀번호 표시/숨김 눈(Eye) 아이콘
-* **Inline Action Button (인라인 버튼):**
-  * 유형: `"인증요청"`, `"재전송"`, `"전액"`, `"조회"`
-  * 버튼 규격: Height `32px` ~ `36px`, Radius `6px` (`$radius.radius2xs`), Padding Horizontal `12px`
-  * 배경: `var(--surface-accent-brand)` 또는 `var(--surface-neutral-primary-muted)`
-
----
-
-## 6. AI UI 생성 규칙 (Generation Rules)
-
-1. **상태 전환 시 레이아웃 보존:** 에러 메시지가 노출될 때 인풋 필드의 높이나 너비가 흔들리지 않도록 하단 메시지 영역의 간격을 유지하세요.
-2. **복합 금융 입력 필드 구현 원칙:**
-   - 금액 입력 케이스: 우측 Suffix 슬롯에 `"원"` 텍스트를 배치하고 필요 시 `"전액"` 인라인 버튼을 함께 결합합니다.
-   - 계좌번호 입력 케이스: Prefix 슬롯에 은행 로고를 배치하고 Core 슬롯에 숫자 폰트(`Pretendard`)를 바인딩합니다.
-3. **토큰 바인딩 강제:** 하드코딩된 `#D1D5DB`, `#E53838`, `rgba(102, 112, 133, 0.10)` 대신 정의된 시맨틱 토큰 변수(`var(--border-neutral-primary-muted)`, `var(--border-status-negative)`, `var(--surface-neutral-disabled)`)를 반드시 사용하세요.
