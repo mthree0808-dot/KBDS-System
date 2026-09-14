@@ -1,76 +1,49 @@
-# pagination Carousel
+# Design-to-Code Specification: Overlay Pagination and Carousel Badge Component
 
-캐러셀 배너, 이미지 뷰어, 리스트 등에서 현재 위치와 전체 페이지 수를 `현재페이지 / 전체페이지` 형식으로 안내하는 컴포넌트입니다.  
-배경 명도 및 적용 컨테이너에 맞춰 **Light(기본)** 및 **Dark/Inverse(반전)** 테마를 지원하며, 뷰의 위계에 따라 **Small(11px)**과 **Medium(15px)** 크기 규격을 제공합니다.
+## 1. 피그마 메타데이터
+- Library Name: 
+- Page: n
+- Component Name: 
+- Figma Link: 
 
----
+## 2. 컴포넌트 구조 (Hierarchy)
+- RootContainer (Wrapper with border radius and purple util border)
+  - OverlayPaginationPill (Fully rounded pill container with backdrop variants)
+    - PrevArrowButton (Navigation control arrow)
+    - PageIndicatorGroup (Current page and total page count text)
+      - CurrentPageText ("1", KBFG Text)
+      - SeparatorText ("/", KBFG Text with opacity)
+      - TotalPageText ("10", KBFG Text with opacity)
+    - NextArrowButton (Navigation control arrow)
+  - PlayStateIndicatorButton (Circular control icon container)
 
-## 1. Component Overview & Matrix
+## 3. 속성 정의 (Properties & Variants)
+| Property Name | Variant Type | Description & Values |
+| :--- | :--- | :--- |
+| `data-size` | Dimension | `small`, `medium`, `large`, `16` |
+| `data-play` | State | `true` |
 
-* **Typography Scale:** 전 규격 공통 `KBFG Text`, Bold (`700`), `wordWrap: break-word`
-* **Size 규격:**
-  * **Small (`size="small"`):** Font Size `11px` / Line Height `15px`
-  * **Medium (`size="medium"`):** Font Size `15px` / Line Height `21px`
-* **Theme / Tone 규격:**
-  * **Light Theme (밝은 배경용):** 모든 텍스트 요소(현재/구분자/전체)가 일관된 Primary 톤 적용
-  * **Dark / On-Fixed Theme (어두운 배경/오버레이용):** 현재 페이지와 구분자/전체 페이지 간의 시각적 위계(Primary vs Secondary) 분리
+## 4. 상세 레이아웃 스펙
+- **컨테이너 및 영역 치수**
+  - Pill Container Radius: 9999px (Fully rounded pill shape)
+  - Small Variant Padding: Horizontal 4px, Vertical 2px, Gap: 4px
+  - Medium / Large Variant Padding: Horizontal 8px, Vertical 4px, Gap: 6px to 8px
+- **컨트롤 및 아이콘 스펙**
+  - Small Play State Button: Size 20x20px, Radius: 9999px
+  - Large Play State Button: Size 32x32px, Radius: 9999px
+- **타이포그래피 스펙**
+  - Small Label Font: Font Family `KBFG Text`, Size 11px, Weight 700 (Bold), Line-height 15px
+  - Medium / Large Label Font: Font Family `KBFG Text`, Size 15px, Weight 700 (Bold), Line-height 21px
 
----
-
-## 2. Component Properties
-
-| Property | Type | Options | Default | Description |
-| :--- | :--- | :--- | :--- | :--- |
-| `size` | Variant | `small`, `medium` | `small` | 폰트 크기 및 라인 하이트 스케일 |
-| `theme` | Variant | `light`, `dark` (또는 `on-fixed`) | `light` | 적용 배경에 따른 컬러 테마 |
-| `currentPage` | Number | Integer | `1` | 현재 활성 페이지 번호 |
-| `totalPage` | Number | Integer | `10` | 전체 페이지 수 |
-
----
-
-## 3. Detailed Specifications by Matrix
-
-### 3.1 Light Theme (`theme="light"`)
-
-밝은 배경 위에서 단독으로 노출되거나 라이트 뱃지 컨테이너 내부에서 사용됩니다.
-
-* **Size: Small (`11px` / `15px`)**
-  * Current Page (`1`): `var(--text-neutral-primary-fixed, #111827)`
-  * Separator (`/`): `var(--text-neutral-primary-fixed, #111827)`
-  * Total Page (`10`): `var(--text-neutral-primary-fixed, #111827)`
-* **Size: Medium (`15px` / `21px`)**
-  * Current Page (`1`): `var(--text-neutral-primary-fixed, #111827)`
-  * Separator (`/`): `var(--text-neutral-primary-fixed, #111827)`
-  * Total Page (`10`): `var(--text-neutral-primary-fixed, #111827)`
-
----
-
-### 3.2 Dark / Inverse Theme (`theme="dark"`)
-
-이미지 배너 상단, 반투명 블랙 캡슐 또는 어두운 서피스 위에서 오버레이로 사용됩니다. 현재 페이지를 강조하고 구분자와 전체 페이지는 서브 톤으로 위계를 낮춥니다.
-
-* **Size: Small (`11px` / `15px`)**
-  * Current Page (`1`): `var(--text-neutral-primary-on-fixed, #FFFFFF)`
-  * Separator (`/`): `var(--text-neutral-secondary-on-fixed, #D1D5DB)`
-  * Total Page (`10`): `var(--text-neutral-secondary-on-fixed, #D1D5DB)`
-* **Size: Medium (`15px` / `21px`)**
-  * Current Page (`1`): `var(--text-neutral-primary-on-fixed, #FFFFFF)`
-  * Separator (`/`): `var(--text-neutral-secondary-on-fixed, #D1D5DB)`
-  * Total Page (`10`): `var(--text-neutral-secondary-on-fixed, #D1D5DB)`
-
----
-
-## 4. Design Tokens Mapping
-
-| Token Name | Fallback | Property | Component Usage |
+## 5. 토큰 바인딩 종합 (Token Mapping Matrix)
+| Background Variant | Surface / Pill Token | Text / Icon Token (Light) | Text / Icon Token (Dark / Fixed) |
 | :--- | :--- | :--- | :--- |
-| `--text-neutral-primary-fixed` | `#111827` | `color` | Light 테마의 전체 텍스트 (현재/구분자/전체) |
-| `--text-neutral-primary-on-fixed` | `#FFFFFF` | `color` | Dark 테마의 현재 페이지 번호 강조 |
-| `--text-neutral-secondary-on-fixed` | `#D1D5DB` | `color` | Dark 테마의 구분자(`/`) 및 전체 페이지 수 |
+| **White 80% Translucent** | `var(--white-800, rgba(255, 255, 255, 0.80))` | `var(--text-neutral-primary-fixed, #111827)` | `var(--icon-neutral-tertiary, #6B7280)` |
+| **Black 40% Translucent** | `var(--black-400, rgba(0, 0, 0, 0.40))` | `var(--text-neutral-primary-on-fixed, white)` | `var(--icon-neutral-primary-on-fixed, white)` |
+| **Black 80% Translucent** | `var(--black-800, rgba(0, 0, 0, 0.80))` | `var(--text-neutral-primary-on-fixed, white)` | `var(--icon-neutral-primary-on-fixed, white)` |
 
----
-
-## 5. Usage & Implementation Notes
-
-* **텍스트 정렬 및 레이아웃:** `display: inline-flex`, `align-items: center`, `gap: 2px` 배치를 기본으로 하며, 페이지 숫자가 변경되어도 너비 흔들림을 최소화하기 위해 숫자 영역에 고정 너비 또는 테이블 넘버(`font-variant-numeric: tabular-nums`) 스타일 지정을 권장합니다.
-* **접근성 (A11y):** 화면 판독기(Screen Reader)가 `1 슬래시 10`으로 불필요한 기호를 읽지 않도록 `aria-label="총 10페이지 중 1페이지"`를 상위 컨테이너에 제공하고, 내부 텍스트는 `aria-hidden="true"` 처리를 권장합니다.
+## 6. 구현 가이드라인
+- **Backdrop Transparency & Contrast Rules**
+  - Overlay pagination pills utilize semi-transparent background tokens (`rgba(255, 255, 255, 0.80)` or `rgba(0, 0, 0, 0.40)/0.80`) to remain legible over dynamic background photography or image carousels.
+- **Flexbox Spacing & Alignment**
+  - Pagination elements use inline flex containers with pill border radii (`9999px`), ensuring text indicators and arrow controls stay perfectly centered vertically regardless of variant sizing.
