@@ -1,0 +1,46 @@
+Top Search Header
+
+본 문서는 상단 내비게이션 영역에서 뒤로가기 버튼과 통합되어 사용되는 검색 바(SearchBar / Search TopBar) 명세입니다.
+알약(Pill) 형태의 라운딩 검색창 컨테이너와 포커스 상태에 따른 커서 및 삭제(Clear) 버튼 노출 규칙을 준수하여 렌더링하세요.
+
+---
+
+## 1. 컴포넌트 구조 (Hierarchy)
+
+SearchBar는 수평 방향(Auto Layout Horizontal)으로 뒤로가기 액션 버튼과 확장형 검색창으로 조립됩니다.
+
+```text
+[SearchBar Container] (Width: 390px / Min-Height: 56px, Gap: 8px)
+  ├── 1. Back Action Button (32px x 32px, Radius: 5.33px)
+  │     └── Icon (Chevron Left: 9.72px x 18px)
+  └── 2. Search Input Field (Flex: 1, Height: Hug, Radius: 9999px)
+        ├── Prefix Icon (Search Magnifier: 20px x 20px)
+        ├── Core Text (17px / Placeholder vs Entered Text + Caret)
+        └── Suffix Action (Clear 'X' Button: 24px x 24px - Focused 상태 시 노출)
+
+2. 속성 (Properties & Variants)PropertyTypeOptionsDefault설명stateStringdefault, focused, entereddefault인터랙션 상태 (기본 / 입력 중 / 입력 완료)  hasBackButtonBooleantrue, falsetrue좌측 뒤로가기 버튼 노출 여부  placeholderStringText"입력해주세요"기본 안내 플레이스홀더 문구  valueStringText""실제 입력된 검색어  3. 상세 레이아웃 스펙전체 컨테이너Dimensions: Width 390px (Fill container), Min Height 56px  Padding:Top / Bottom: 4px ($spacing.spacingXs)  Left / Right: 20px ($spacing.spacing2xl)  Layout: Auto Layout Horizontal, Align Center, Gap 8px ($spacing.spacingMd)  Background: 기본 Transparent (상단 헤더 또는 화면 배경 상속)  1. 좌측 뒤로가기 버튼 (Back Button)Dimensions: Width 32px, Height 32px  Corner Radius: 5.33px  Layout: Center Alignment  Icon Vector (Chevron Left):Size: Width 9.72px, Height 18px  Color: var(--icon-neutral-primary) (#111827)  2. 검색 입력 필드 (Search Input Field)Dimensions: flex: 1 1 0 (Fill container), Height Auto (Hug contents)  Padding: All 12px ($spacing.spacingLg)  Corner Radius: 9999px ($radius.radiusFull - 완벽한 Pill 형태)  Background: var(--surface-neutral-tertiary-muted) (#f9fafb)  Layout: Auto Layout Horizontal, Align Center, Space-Between / Gap 8px ($spacing.spacingMd)  3. 검색창 내부 요소 규격검색 아이콘 (Prefix Icon):Box: 20px x 20px, Vector: 15.21px x 15.21px  Color: var(--icon-neutral-primary) (#111827)  검색 텍스트 (Core Text Area):Typography: KBFG Text, Size 17px ($type.fontSizeBodyLgFixed), Line Height 24px  Placeholder Weight: 500 ($type.fontWeightMedium)  Entered / Focused Weight: 700 ($type.fontWeightBold)  입력 커서 (Caret - Focused 상태):Dimensions: Width 1.6px, Height 24px  Color: var(--icon-accent-brand-alt) (#111827)  Gap: 텍스트와 커서 사이 Gap 1px ($spacing.spacing3xs)  전체 삭제 버튼 (Suffix Clear Button - Focused 상태):Button Box: 24px x 24px, Radius 4px ($radius.radius3xs)  Icon Vector ('X'): 18px x 18px, Color var(--icon-neutral-quaternary) (#9ca3af)  4. 토큰 바인딩 종합 (Token Mapping Matrix)구분 (Area)UI 요소 (Element)Default (Placeholder)Focused (Active)Entered (Completed)Back Button뒤로가기 아이콘 (Chevron)var(--icon-neutral-primary)  var(--icon-neutral-primary)  var(--icon-neutral-primary)  Input Field인풋 필드 배경 (Background)var(--surface-neutral-tertiary-muted)  var(--surface-neutral-tertiary-muted)  var(--surface-neutral-tertiary-muted)  검색 아이콘 (Magnifier)var(--icon-neutral-primary)  var(--icon-neutral-primary)  var(--icon-neutral-primary)  텍스트 (Text)var(--text-neutral-placeholder) (#9ca3af)  var(--text-neutral-primary) (#111827)  var(--text-neutral-primary) (#111827)  입력 커서 (Caret)-var(--icon-accent-brand-alt) (#111827)  -삭제 아이콘 (Clear Button)-var(--icon-neutral-quaternary) (#9ca3af)  -5. AI UI 생성 규칙 (Generation Rules)상단 고정 헤더 배치:검색 전용 서브 페이지 최상단에 배치되며, 일반 네비게이션 탑바(NavigationBar) 대신 단독 헤더로 기능합니다.  바로 위에 System / StatusBar 컴포넌트를 배치하여 모바일 상단 프레임을 조립하세요[cite: 4].인터랙션 및 Suffix 제어:state: 'focused'일 때만 우측의 일괄 삭제(X) 버튼을 노출하고, 포커스가 해제된 entered 및 default 상태에서는 숨김 처리합니다[cite: 4].Pill(알약) 스타일 유지:모서리 곡률은 개별 수치가 아닌 반드시 radiusFull (9999px) 토큰을 적용하여 완벽한 라운드 형태를 유지하세요[cite: 4].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
